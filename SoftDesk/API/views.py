@@ -173,3 +173,4 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
                 raise Exception("Ce problème a deja été ajouté au projet")
         else:
             raise PermissionDenied()
+
