@@ -184,5 +184,14 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
         else:
             raise PermissionDenied()
 
+    def perform_update(self, serializer):
+        issue_id = self.kwargs.get("pk")
+        issue = get_object_or_404(Issues, id=issue_id)
+        assignated_user_id = issue.issue_assignee_user_id.pk
+        issue_creator = get_object_or_404(Users, id=assignated_user_id)
+        if self.request.user == issue_creator:
+            serializer.save()
+        else:
+            raise PermissionDenied()
 
 
