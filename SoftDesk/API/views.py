@@ -147,14 +147,14 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
         project = Projects.objects.get(id=project_id)
         project_contributors = []
         project_contributors_req = Contributors.objects.filter(contributors_project_id=project_id)
+        issue_id = self.kwargs.get('pk')
+        queryset= Issues.objects.all().filter(issue_project_id=project)
         for project_contributor in project_contributors_req:
             project_contributors.append(project_contributor.contributors_user_id)
         if self.request.user in project_contributors:
-            try:
-                issues = Issues.objects.get(issue_project_id=project_id)
-            except Projects.DoesNotExist:
-                raise NotFound("Il n'y a pas de projet avec cet ID")
-            return self.queryset.filter(issue_project_id=project)
+            if issue_id:
+                queryset = queryset.filter(id=issue_id)
+            return queryset
         else:
             raise PermissionDenied()
 
@@ -173,4 +173,16 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
                 raise Exception("Ce problème a deja été ajouté au projet")
         else:
             raise PermissionDenied()
+
+    def perform_destroy(self, serializer):
+        issue_id = self.kwargs.get("pk")
+        issue = get_object_or_404(Issues, id=issue_id)
+        assignated_user_id = issue.issue_assignee_user_id.pk
+        issue_creator = get_object_or_404(Users, id=assignated_user_id)
+        if self.request.user == issue_creator:
+            issue.delete()
+        else:
+            raise PermissionDenied()
+
+
 
