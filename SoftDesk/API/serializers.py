@@ -108,4 +108,9 @@ class ProjectsDetailSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
+class CommentsListSerializer(serializers.ModelSerializer):
+    pass
 
+
+class CommentsDetailSerializer(serializers.ModelSerializer):
+    pass

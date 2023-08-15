@@ -15,9 +15,9 @@ from rest_framework_simplejwt.tokens import AccessToken
 from API.serializers import SignupSerializer, \
     ProjectsListSerializer, \
     ProjectsDetailSerializer, \
-    UsersSerializer, IssuesListSerializer, IssuesDetailSerializer
+    UsersSerializer, IssuesListSerializer, IssuesDetailSerializer, CommentsListSerializer, CommentsDetailSerializer
 
-from API.models import Projects, Users, Contributors, Issues
+from API.models import Projects, Users, Contributors, Issues, Comments
 
 from API.permissions import ProjectPermissions
 
@@ -194,4 +194,12 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
         else:
             raise PermissionDenied()
 
+class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
+    permission_classes = [IsAuthenticated, ]
+    serializer_class = CommentsListSerializer
+    detail_serializer_class = CommentsDetailSerializer
+
+    queryset = Comments.objects.all().select_related(
+        'comments_issue_id'
+    )
 
