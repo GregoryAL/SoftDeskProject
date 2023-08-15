@@ -238,3 +238,23 @@ class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
                 raise Exception("Ce commentaire n'a pas pu être ajouté.")
         else:
             raise PermissionDenied()
+
+    def perform_destroy(self, serializer):
+        comment_id = self.kwargs.get("pk")
+        comment = get_object_or_404(Comments, id=comment_id)
+        comment_user_id = comment.comments_author_user_id.pk
+        comment_creator = get_object_or_404(Users, id=comment_user_id)
+        if self.request.user == comment_creator:
+            comment.delete()
+        else:
+            raise PermissionDenied()
+
+    def perform_update(self, serializer):
+        comment_id = self.kwargs.get("pk")
+        comment = get_object_or_404(Comments, id=comment_id)
+        comment_user_id = comment.comments_author_user_id.pk
+        comment_creator = get_object_or_404(Users, id=comment_user_id)
+        if self.request.user == comment_creator:
+            serializer.save()
+        else:
+            raise PermissionDenied()
