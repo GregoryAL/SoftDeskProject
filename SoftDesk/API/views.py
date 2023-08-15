@@ -68,10 +68,15 @@ class ProjectsViewset(MultipleSerializerMixin, ModelViewSet):
             role='A'
         )
 
-    @action(detail=True, methods=['post'])
-    def disable(self, request, pk):
-        self.get_object().disable()
-        return Response()
+    def perform_destroy(self, instance):
+        project_id = self.kwargs.get("pk")
+        project = Projects.objects.get(id=project_id)
+        project_owner_id = project.project_author_user_id.pk
+        project_owner = Users.objects.get(id=project_owner_id)
+        if self.request.user == project_owner:
+            project.delete()
+        else:
+            raise PermissionDenied()
 
 
 class ProjectContributorsViewset(ModelViewSet):
