@@ -203,3 +203,38 @@ class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
         'comments_issue_id'
     )
 
+    def get_queryset(self, *args, **kwargs):
+        project_id = self.kwargs.get("project_pk")
+        project = Projects.objects.get(id=project_id)
+        project_contributors = []
+        project_contributors_req = Contributors.objects.filter(contributors_project_id=project_id)
+        issue_id = self.kwargs.get('issues_pk')
+        issue = Issues.objects.get(id=issue_id)
+        comment_id = self.kwargs.get('pk')
+        queryset = Comments.objects.all().filter(comments_issue_id=issue)
+
+        for project_contributor in project_contributors_req:
+            project_contributors.append(project_contributor.contributors_user_id)
+        if self.request.user in project_contributors:
+            if comment_id:
+                queryset = queryset.filter(id=comment_id)
+            return queryset
+        else:
+            raise PermissionDenied()
+
+    def perform_create(self, serializer):
+        project_id = self.kwargs.get("project_pk")
+        project = Projects.objects.get(id=project_id)
+        project_contributors = []
+        project_contributors_req = Contributors.objects.filter(contributors_project_id=project)
+        for project_contributor in project_contributors_req:
+            project_contributors.append(project_contributor.contributors_user_id)
+        issue_id = self.kwargs.get('issues_pk')
+        issue = Issues.objects.get(id=issue_id)
+        if self.request.user in project_contributors:
+            try :
+                comment = serializer.save(comments_issue_id=issue, comments_author_user_id=self.request.user)
+            except:
+                raise Exception("Ce commentaire n'a pas pu être ajouté.")
+        else:
+            raise PermissionDenied()

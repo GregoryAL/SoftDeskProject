@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.http import request
 from rest_framework import serializers
 
-from API.models import Users, Projects, Contributors, Issues
+from API.models import Users, Projects, Contributors, Issues, Comments
 from rest_framework.validators import UniqueValidator
 
 
@@ -48,6 +48,31 @@ class UsersSerializer(serializers.ModelSerializer):
         model = Contributors
         fields = ['id', 'contributors_user_id',  'contributors_project_id', 'permission', 'role']
         read_only_fields = ('contributors_project_id', 'permission')
+
+
+class CommentsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id',
+                  'description',
+                  'comments_author_user_id',
+                  'comments_issue_id',
+                  'created_time'
+                  ]
+        read_only_fields = ('id', 'comments_author_user_id', 'comments_issue_id', 'created_time')
+
+
+class CommentsDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id',
+                  'description',
+                  'comments_author_user_id',
+                  'comments_issue_id',
+                  'created_time'
+                  ]
+
+        read_only_fields = ('id', 'description', 'comments_author_user_id', 'comments_issue_id', 'created_time')
 
 
 class IssuesListSerializer(serializers.ModelSerializer):
@@ -106,11 +131,3 @@ class ProjectsDetailSerializer(serializers.ModelSerializer):
     def get_users(self, instance):
         serializer = UsersSerializer(many=True, read_only=True)
         return serializer.data
-
-
-class CommentsListSerializer(serializers.ModelSerializer):
-    pass
-
-
-class CommentsDetailSerializer(serializers.ModelSerializer):
-    pass
