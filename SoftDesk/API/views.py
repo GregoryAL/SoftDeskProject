@@ -39,7 +39,6 @@ def get_token_info(token_str):
     return Response(user)
 
 
-
 class SignupView(generics.CreateAPIView):
 
     permission_classes = (AllowAny,)
@@ -68,16 +67,6 @@ class ProjectsViewset(MultipleSerializerMixin, ModelViewSet):
             role='A'
         )
 
-    def perform_destroy(self, instance):
-        project_id = self.kwargs.get("pk")
-        project = Projects.objects.get(id=project_id)
-        project_owner_id = project.project_author_user_id.pk
-        project_owner = Users.objects.get(id=project_owner_id)
-        if self.request.user == project_owner:
-            project.delete()
-        else:
-            raise PermissionDenied()
-
 
 class ProjectContributorsViewset(ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -86,7 +75,6 @@ class ProjectContributorsViewset(ModelViewSet):
     queryset = Contributors.objects.all().select_related(
         'contributors_project_id'
     )
-
 
     def get_queryset(self, *args, **kwargs):
         project_id = self.kwargs.get("project_pk")
@@ -114,7 +102,7 @@ class ProjectContributorsViewset(ModelViewSet):
             project_owner = project_owner_r.contributors_user_id
         project_owner_id = project_owner.pk
         if self.request.user == project_owner:
-            try :
+            try:
                 contributor = serializer.save(contributors_project_id=project, permission='L')
             except django.db.utils.IntegrityError:
                 raise Exception("Cet utilisateur a deja été ajouté au projet")
@@ -153,7 +141,7 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
         project_contributors = []
         project_contributors_req = Contributors.objects.filter(contributors_project_id=project_id)
         issue_id = self.kwargs.get('pk')
-        queryset= Issues.objects.all().filter(issue_project_id=project)
+        queryset = Issues.objects.all().filter(issue_project_id=project)
         for project_contributor in project_contributors_req:
             project_contributors.append(project_contributor.contributors_user_id)
         if self.request.user in project_contributors:
@@ -171,7 +159,7 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
         for project_contributor in project_contributors_req:
             project_contributors.append(project_contributor.contributors_user_id)
         if self.request.user in project_contributors:
-            try :
+            try:
                 issue = serializer.save(issue_project_id=project, issue_author_user_id=self.request.user,
                                         issue_assignee_user_id=self.request.user)
             except django.db.utils.IntegrityError:
@@ -198,6 +186,7 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
             serializer.save()
         else:
             raise PermissionDenied()
+
 
 class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
     permission_classes = [IsAuthenticated, ]
@@ -237,7 +226,7 @@ class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
         issue_id = self.kwargs.get('issues_pk')
         issue = Issues.objects.get(id=issue_id)
         if self.request.user in project_contributors:
-            try :
+            try:
                 comment = serializer.save(comments_issue_id=issue, comments_author_user_id=self.request.user)
             except:
                 raise Exception("Ce commentaire n'a pas pu être ajouté.")

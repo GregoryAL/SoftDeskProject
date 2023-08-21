@@ -89,12 +89,19 @@ class IssuesListSerializer(serializers.ModelSerializer):
 
 
 class IssuesDetailSerializer(serializers.ModelSerializer):
+
+    comments_issue_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Issues
         fields = ['id', 'title', 'description', 'tag', 'priority', 'issue_project_id', 'status', 'issue_author_user_id',
-                  'issue_assignee_user_id', 'created_time']
+                  'issue_assignee_user_id', 'created_time', 'comments_issue_id']
         read_only_fields = ('issue_author_user_id', 'created_time', 'issue_project_id', 'issue_assignee_user_id')
 
+    def get_comments_issue_id(self, instance):
+        queryset = instance.comments_issue_id
+        serializer = CommentsListSerializer(queryset, many=True)
+        return serializer.data
 
 class ProjectsListSerializer(serializers.ModelSerializer):
 
@@ -125,9 +132,7 @@ class ProjectsDetailSerializer(serializers.ModelSerializer):
                   'title',
                   'project_type',
                   'project_author_user_id',
-                  'description'
+                  'description',
+                  'contributors_project_id',
+                  'issue_project_id'
                   ]
-
-    def get_users(self, instance):
-        serializer = UsersSerializer(many=True, read_only=True)
-        return serializer.data
