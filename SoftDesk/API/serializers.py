@@ -42,12 +42,27 @@ class SignupSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Users
+        fields = ['id', 'first_name', 'last_name']
+        read_only_fields = ('first_name', 'last_name')
+
+
 class UsersSerializer(serializers.ModelSerializer):
+
+    contributors_user_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Contributors
         fields = ['id', 'contributors_user_id',  'contributors_project_id', 'permission', 'role']
         read_only_fields = ('contributors_project_id', 'permission')
+
+    def get_contributors_user_id(self, instance):
+        queryset = instance.contributors_user_id
+        serializer = UserModelSerializer(queryset, many=False)
+        return serializer.data
 
 
 class CommentsListSerializer(serializers.ModelSerializer):
@@ -126,6 +141,9 @@ class ProjectsListSerializer(serializers.ModelSerializer):
 
 class ProjectsDetailSerializer(serializers.ModelSerializer):
 
+    issue_project_id = serializers.SerializerMethodField()
+    contributors_project_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Projects
         fields = ['id',
@@ -136,3 +154,13 @@ class ProjectsDetailSerializer(serializers.ModelSerializer):
                   'contributors_project_id',
                   'issue_project_id'
                   ]
+
+    def get_contributors_project_id(self, instance):
+        queryset = instance.contributors_project_id
+        serializer = UsersSerializer(queryset, many=True)
+        return serializer.data
+
+    def get_issue_project_id(self, instance):
+        queryset = instance.issue_project_id
+        serializer = IssuesListSerializer(queryset, many=True)
+        return serializer.data
