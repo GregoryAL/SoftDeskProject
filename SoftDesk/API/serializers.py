@@ -7,6 +7,26 @@ from API.models import Users, Projects, Contributors, Issues, Comments
 from rest_framework.validators import UniqueValidator
 
 
+class DynamicFieldsModelSerializer(serializers.ModelSerializer):
+    """
+    A ModelSerializer that takes an additional `fields` argument that
+    controls which fields should be displayed.
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Don't pass the 'fields' arg up to the superclass
+        fields = kwargs.pop('fields', None)
+
+        # Instantiate the superclass normally
+        super().__init__(*args, **kwargs)
+
+        if fields is not None:
+            # Drop any fields that are not specified in the `fields` argument.
+            allowed = set(fields)
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
 class SignupSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(
@@ -42,7 +62,7 @@ class SignupSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserModelSerializer(serializers.ModelSerializer):
+class UserModelSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Users
@@ -50,7 +70,7 @@ class UserModelSerializer(serializers.ModelSerializer):
         read_only_fields = ('first_name', 'last_name')
 
 
-class UsersSerializer(serializers.ModelSerializer):
+class UsersSerializer(DynamicFieldsModelSerializer):
 
     contributors_user_id = serializers.SerializerMethodField()
 
@@ -65,7 +85,7 @@ class UsersSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
-class CommentsListSerializer(serializers.ModelSerializer):
+class CommentsListSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Comments
         fields = ['id',
@@ -77,7 +97,7 @@ class CommentsListSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'comments_author_user_id', 'comments_issue_id', 'created_time')
 
 
-class CommentsDetailSerializer(serializers.ModelSerializer):
+class CommentsDetailSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Comments
         fields = ['id',
@@ -90,7 +110,7 @@ class CommentsDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'description', 'comments_author_user_id', 'comments_issue_id', 'created_time')
 
 
-class IssuesListSerializer(serializers.ModelSerializer):
+class IssuesListSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Issues
@@ -103,7 +123,7 @@ class IssuesListSerializer(serializers.ModelSerializer):
         }
 
 
-class IssuesDetailSerializer(serializers.ModelSerializer):
+class IssuesDetailSerializer(DynamicFieldsModelSerializer):
 
     comments_issue_id = serializers.SerializerMethodField()
 
@@ -115,10 +135,12 @@ class IssuesDetailSerializer(serializers.ModelSerializer):
 
     def get_comments_issue_id(self, instance):
         queryset = instance.comments_issue_id
-        serializer = CommentsListSerializer(queryset, many=True)
+        serializer = CommentsListSerializer(queryset, many=True, fields=('id', 'description', 'comments_author_user_id',
+                                                                         'created_time'))
         return serializer.data
 
-class ProjectsListSerializer(serializers.ModelSerializer):
+
+class ProjectsListSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = Projects
@@ -139,7 +161,7 @@ class ProjectsListSerializer(serializers.ModelSerializer):
         return value
 
 
-class ProjectsDetailSerializer(serializers.ModelSerializer):
+class ProjectsDetailSerializer(DynamicFieldsModelSerializer):
 
     issue_project_id = serializers.SerializerMethodField()
     contributors_project_id = serializers.SerializerMethodField()
@@ -157,10 +179,11 @@ class ProjectsDetailSerializer(serializers.ModelSerializer):
 
     def get_contributors_project_id(self, instance):
         queryset = instance.contributors_project_id
-        serializer = UsersSerializer(queryset, many=True)
+        serializer = UsersSerializer(queryset, many=True, fields=('id', 'contributors_user_id', 'role'))
         return serializer.data
 
     def get_issue_project_id(self, instance):
         queryset = instance.issue_project_id
-        serializer = IssuesListSerializer(queryset, many=True)
+        serializer = IssuesListSerializer(queryset, many=True, fields=('id', 'title','tag', 'priority', 'status',
+                                                                       'issue_author_user_id','created_time'))
         return serializer.data
