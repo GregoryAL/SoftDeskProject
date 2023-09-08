@@ -31,16 +31,19 @@ class Projects(models.Model):
 
 class Contributors(models.Model):
 
-    PERMISSION_CHOICES = (
-        ('C', 'Complete'),
-        ('L', 'Limitée')
-    )
-    ROLE_CHOICES = (
-        ('A', 'Auteur'),
-        ('C', 'Contributeur')
-    )
+    COMPLETE = "CP"
+    LIMITEE = "LI"
+    AUTEUR = "AU"
+    CONTRIBUTEUR = "CT"
 
-
+    PERMISSION_CHOICES = [
+        (COMPLETE, 'Complete'),
+        (LIMITEE, 'Limitée')
+    ]
+    ROLE_CHOICES = [
+        (AUTEUR, 'Auteur'),
+        (CONTRIBUTEUR, 'Contributeur')
+    ]
 
     contributors_user_id = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
@@ -52,8 +55,8 @@ class Contributors(models.Model):
         on_delete=models.CASCADE,
         related_name="contributors_project_id"
     )
-    permission = models.CharField(max_length=1, choices=PERMISSION_CHOICES)
-    role = models.CharField(max_length=1, choices=ROLE_CHOICES)
+    permission = models.CharField(max_length=2, choices=PERMISSION_CHOICES)
+    role = models.CharField(max_length=2, choices=ROLE_CHOICES)
 
     class Meta:
         unique_together = (

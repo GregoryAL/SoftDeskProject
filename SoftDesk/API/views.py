@@ -63,8 +63,8 @@ class ProjectsViewset(MultipleSerializerMixin, ModelViewSet):
         contributor = Contributors.objects.create(
             contributors_user_id=self.request.user,
             contributors_project_id=project,
-            permission='C',
-            role='A'
+            permission='CP',
+            role='AU'
         )
 
 
@@ -87,7 +87,10 @@ class ProjectContributorsViewset(ModelViewSet):
                 project = Projects.objects.get(id=project_id)
             except Projects.DoesNotExist:
                 raise NotFound("Il n'y a pas de projet avec cet ID")
-            return self.queryset.filter(contributors_project_id=project)
+            project_query = self.queryset.filter(contributors_project_id=project)
+            for project_object in project_query:
+                proj_obj_permission = project_object.permission
+            return project_query
         else:
             raise PermissionDenied()
 
@@ -97,13 +100,13 @@ class ProjectContributorsViewset(ModelViewSet):
 
         project_owner_req = Contributors.objects.filter(
             Q(contributors_project_id=project),
-            Q(permission='C'))
+            Q(permission='CP'))
         for project_owner_r in project_owner_req:
             project_owner = project_owner_r.contributors_user_id
         project_owner_id = project_owner.pk
         if self.request.user == project_owner:
             try:
-                contributor = serializer.save(contributors_project_id=project, permission='L')
+                contributor = serializer.save(contributors_project_id=project, permission='LI')
             except django.db.utils.IntegrityError:
                 raise Exception("Cet utilisateur a deja été ajouté au projet")
         else:
