@@ -74,20 +74,21 @@ class UserModelSerializer(DynamicFieldsModelSerializer):
 
 class UsersSerializer(DynamicFieldsModelSerializer):
 
-    contributors_user_id_display = serializers.SerializerMethodField(read_only=True)
+    contributors_user = serializers.SerializerMethodField(read_only=True)
     permission = serializers.CharField(source='get_permission_display', read_only=True)
-    role_display = serializers.CharField(source='get_role_display', read_only=True)
+    role_long = serializers.CharField(source='get_role_display', read_only=True)
 
     class Meta:
         model = Contributors
-        fields = ['id', 'contributors_user_id', 'contributors_user_id_display', 'contributors_project_id', 'permission', 'role', 'role_display']
-        read_only_fields = ('contributors_project_id', 'permission', 'role_display', 'contributors_user_id_display')
+        fields = ['id', 'contributors_user_id', 'contributors_user', 'contributors_project_id', 'permission',
+                  'role', 'role_long']
+        read_only_fields = ('contributors_project_id', 'permission', 'role_long', 'contributors_user')
         extra_kwargs = {
             'role': {'write_only': True},
             'contributors_user_id': {'write_only': True}
         }
 
-    def get_contributors_user_id_display(self, instance):
+    def get_contributors_user(self, instance):
         queryset = instance.contributors_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
@@ -102,18 +103,19 @@ class UsersSerializer(DynamicFieldsModelSerializer):
 
 class CommentsListSerializer(DynamicFieldsModelSerializer):
 
-    comments_author_user_id = serializers.SerializerMethodField()
+    comments_author_user = serializers.SerializerMethodField()
     class Meta:
         model = Comments
         fields = ['id',
                   'description',
+                  'comments_author_user',
                   'comments_author_user_id',
                   'comments_issue_id',
                   'created_time'
                   ]
-        read_only_fields = ('id', 'comments_author_user_id', 'comments_issue_id', 'created_time')
+        read_only_fields = ('id', 'comments_author_user', 'comments_author_user_id', 'comments_issue_id', 'created_time')
 
-    def get_comments_author_user_id(self, instance):
+    def get_comments_author_user(self, instance):
         queryset = instance.comments_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
@@ -142,29 +144,35 @@ class CommentsDetailSerializer(DynamicFieldsModelSerializer):
 
 class IssuesListSerializer(DynamicFieldsModelSerializer):
 
-    issue_author_user_id = serializers.SerializerMethodField()
-    issue_assignee_user_id = serializers.SerializerMethodField()
-    tag = serializers.CharField(source='get_tag_display')
-    priority = serializers.CharField(source='get_priority_display')
-    status = serializers.CharField(source='get_status_display')
+    issue_author_user = serializers.SerializerMethodField()
+    issue_assignee_user = serializers.SerializerMethodField()
+    tag_long = serializers.CharField(source='get_tag_display', read_only=True)
+    priority_long = serializers.CharField(source='get_priority_display', read_only=True)
+    status_long = serializers.CharField(source='get_status_display', read_only=True)
 
 
     class Meta:
         model = Issues
-        fields = ['id', 'title', 'description', 'tag', 'priority', 'issue_project_id', 'status', 'issue_author_user_id',
-                  'issue_assignee_user_id', 'created_time']
-        read_only_fields = ('issue_author_user_id', 'created_time', 'issue_project_id', 'issue_assignee_user_id')
+        fields = ['id', 'title', 'description', 'tag', 'tag_long', 'priority', 'priority_long',
+                  'issue_project_id', 'status', 'status_long', 'issue_author_user_id',
+                  'issue_author_user', 'issue_assignee_user_id', 'issue_assignee_user',
+                  'created_time']
+        read_only_fields = ('issue_author_user_id', 'created_time', 'issue_project_id',
+                            'issue_assignee_user_id', 'tag_long', 'priority_long', 'status display')
         extra_kwargs = {
             'tag' : {'write_only': True},
             'priority': {'write_only': True},
+            'status': {'write_only': True},
+            'issue_author_user': {'write_only': True},
+            'issue_assignee_user': {'write_only': True}
         }
 
-    def get_issue_author_user_id(self, instance):
+    def get_issue_author_user(self, instance):
         queryset = instance.issue_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
-    def get_issue_assignee_user_id(self, instance):
+    def get_issue_assignee_user(self, instance):
         queryset = instance.issue_assignee_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
@@ -172,18 +180,28 @@ class IssuesListSerializer(DynamicFieldsModelSerializer):
 
 class IssuesDetailSerializer(DynamicFieldsModelSerializer):
 
-    comments_issue_id = serializers.SerializerMethodField()
-    issue_author_user_id = serializers.SerializerMethodField()
-    issue_assignee_user_id = serializers.SerializerMethodField()
-    tag = serializers.CharField(source='get_tag_display')
-    priority = serializers.CharField(source='get_priority_display')
-    status = serializers.CharField(source='get_status_display')
+    comments_issue = serializers.SerializerMethodField()
+    issue_author_user = serializers.SerializerMethodField()
+    issue_assignee_user = serializers.SerializerMethodField()
+    tag_long = serializers.CharField(source='get_tag_display', read_only=True)
+    priority_long = serializers.CharField(source='get_priority_display', read_only=True)
+    status_long = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = Issues
-        fields = ['id', 'title', 'description', 'tag', 'priority', 'issue_project_id', 'status', 'issue_author_user_id',
-                  'issue_assignee_user_id', 'created_time', 'comments_issue_id']
-        read_only_fields = ('issue_author_user_id', 'created_time', 'issue_project_id', 'issue_assignee_user_id')
+        fields = ['id', 'title', 'description', 'tag', 'tag_long', 'priority', 'priority_long', 'issue_project_id',
+                  'status', 'status_long', 'issue_author_user_id', 'issue_assignee_user_id', 'issue_assignee_user',
+                  'created_time', 'comments_issue_id', 'issue_author_user', 'comments_issue']
+        read_only_fields = ('issue_author_user', 'created_time', 'issue_project_id', 'issue_assignee_user', 'tag_long',
+                            'priority_long', 'status_long')
+        extra_kwargs = {
+            'issue_author_user_id': {'write_only': True},
+            'comments_issue_id': {'write_only': True},
+            'issue_assignee_user_id': {'write_only': True},
+            'tag': {'write_only': True},
+            'priority': {'write_only': True},
+            'status': {'write_only': True}
+        }
 
     def get_comments_issue_id(self, instance):
         queryset = instance.comments_issue_id
@@ -204,8 +222,8 @@ class IssuesDetailSerializer(DynamicFieldsModelSerializer):
 
 class ProjectsListSerializer(DynamicFieldsModelSerializer):
 
-    """project_type = serializers.CharField(source='get_project_type_display')
-    project_author_user_id = serializers.SerializerMethodField()"""
+    project_type_long = serializers.CharField(source='get_project_type_display', read_only=True)
+    project_author_user = serializers.SerializerMethodField()
 
 
     class Meta:
@@ -213,12 +231,15 @@ class ProjectsListSerializer(DynamicFieldsModelSerializer):
         fields = ['id',
                   'title',
                   'project_type',
+                  'project_type_long',
                   'project_author_user_id',
+                  'project_author_user',
                   'description'
                 ]
-        read_only_fields = ('project_author_user_id',)
+        read_only_fields = ('project_author_user', 'project_author_user_id', 'project_type_long')
         extra_kwargs = {
-            'description': {'write_only': True}
+            'description': {'write_only': True},
+            'project_type': {'write_only': True}
         }
 
     def validate_title(self, value):
@@ -226,7 +247,7 @@ class ProjectsListSerializer(DynamicFieldsModelSerializer):
             raise serializers.ValidationError('Ce nom de projet existe déjà')
         return value
 
-    def get_project_author_user_id(self, instance):
+    def get_project_author_user(self, instance):
         queryset = instance.project_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
@@ -234,10 +255,10 @@ class ProjectsListSerializer(DynamicFieldsModelSerializer):
 
 class ProjectsDetailSerializer(DynamicFieldsModelSerializer):
 
-    """issue_project_id = serializers.SerializerMethodField()
+    issue_project_id = serializers.SerializerMethodField()
     contributors_project_id = serializers.SerializerMethodField()
     project_author_user_id = serializers.SerializerMethodField()
-    project_type = serializers.CharField(source='get_project_type_display')"""
+    project_type = serializers.CharField(source='get_project_type_display')
 
     class Meta:
         model = Projects
