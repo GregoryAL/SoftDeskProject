@@ -21,6 +21,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from API.views import SignupView, ProjectsViewset, ProjectContributorsViewset, ProjectIssuesViewer, IssueCommentsViewer
 
+""" add a router to manage URL """
 router = routers.SimpleRouter()
 router.register('projects', ProjectsViewset, basename='projects')
 projects_router = routers.NestedSimpleRouter(

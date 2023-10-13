@@ -24,6 +24,8 @@ from API.permissions import ProjectPermissions
 
 class MultipleSerializerMixin:
 
+    """ View used to manage the detail view if an id is provided """
+
     detail_serializer_class = None
 
     def get_serializer_class(self):
@@ -32,20 +34,27 @@ class MultipleSerializerMixin:
         return super().get_serializer_class()
 
 
-def get_token_info(token_str):
-    access_token_obj = AccessToken(token_str)
-    user_id = access_token_obj['user_id']
-    user = Users.objects.get(id=user_id)
-    return Response(user)
+    def get_token_info(token_str):
+
+        """ View used to get tokens after successful login """
+
+        access_token_obj = AccessToken(token_str)
+        user_id = access_token_obj['user_id']
+        user = Users.objects.get(id=user_id)
+        return Response(user)
 
 
 class SignupView(generics.CreateAPIView):
+
+    """ view used to sign up """
 
     permission_classes = (AllowAny,)
     serializer_class = SignupSerializer
 
 
 class ProjectsViewset(MultipleSerializerMixin, ModelViewSet):
+
+    """ view used to manage projects """
 
     serializer_class = ProjectsListSerializer
     detail_serializer_class = ProjectsDetailSerializer
@@ -69,6 +78,9 @@ class ProjectsViewset(MultipleSerializerMixin, ModelViewSet):
 
 
 class ProjectContributorsViewset(ModelViewSet):
+
+    """ view used to manage contributors """
+
     permission_classes = [IsAuthenticated]
     serializer_class = UsersSerializer
 
@@ -130,6 +142,9 @@ class ProjectContributorsViewset(ModelViewSet):
 
 
 class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
+
+    """ View used to manage Project issues """
+
     permission_classes = [IsAuthenticated]
     serializer_class = IssuesListSerializer
     detail_serializer_class = IssuesDetailSerializer
@@ -192,6 +207,9 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
 
 
 class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
+
+    """ View used to manage Comment's issues """
+
     permission_classes = [IsAuthenticated, ]
     serializer_class = CommentsListSerializer
     detail_serializer_class = CommentsDetailSerializer

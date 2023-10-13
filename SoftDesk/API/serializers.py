@@ -9,6 +9,7 @@ from rest_framework.validators import UniqueValidator
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
+
     """
     A ModelSerializer that takes an additional `fields` argument that
     controls which fields should be displayed.
@@ -30,6 +31,8 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
+
+    """ a serializer that is used for signup """
 
     email = serializers.EmailField(
         required=True,
@@ -66,6 +69,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class UserModelSerializer(DynamicFieldsModelSerializer):
 
+    """ a serializer that is used by UsersSerializer to display names """
     class Meta:
         model = Users
         fields = ['id', 'first_name', 'last_name']
@@ -74,6 +78,7 @@ class UserModelSerializer(DynamicFieldsModelSerializer):
 
 class UsersSerializer(DynamicFieldsModelSerializer):
 
+    """ a serializer that is used for the contributors"""
     contributors_user = serializers.SerializerMethodField(read_only=True)
     permission = serializers.CharField(source='get_permission_display', read_only=True)
     role_long = serializers.CharField(source='get_role_display', read_only=True)
@@ -103,6 +108,9 @@ class UsersSerializer(DynamicFieldsModelSerializer):
 
 class CommentsListSerializer(DynamicFieldsModelSerializer):
 
+
+    """ Serializer used to display the comments list , add a comment"""
+
     comments_author_user = serializers.SerializerMethodField()
     class Meta:
         model = Comments
@@ -122,6 +130,8 @@ class CommentsListSerializer(DynamicFieldsModelSerializer):
 
 
 class CommentsDetailSerializer(DynamicFieldsModelSerializer):
+
+    """ serializer used to display a comment detail """
 
     comments_author_user_id = serializers.SerializerMethodField()
 
@@ -143,6 +153,8 @@ class CommentsDetailSerializer(DynamicFieldsModelSerializer):
 
 
 class IssuesListSerializer(DynamicFieldsModelSerializer):
+
+    """ serializer used to display Issues's list or add a new one """
 
     issue_author_user = serializers.SerializerMethodField()
     issue_assignee_user = serializers.SerializerMethodField()
@@ -179,6 +191,8 @@ class IssuesListSerializer(DynamicFieldsModelSerializer):
 
 
 class IssuesDetailSerializer(DynamicFieldsModelSerializer):
+
+    """ Serializer used to display a detailed issue"""
 
     comments_issue = serializers.SerializerMethodField()
     issue_author_user = serializers.SerializerMethodField()
@@ -222,6 +236,8 @@ class IssuesDetailSerializer(DynamicFieldsModelSerializer):
 
 class ProjectsListSerializer(DynamicFieldsModelSerializer):
 
+    """ serializer used to display a projects's list or to add a new project """
+
     project_type_long = serializers.CharField(source='get_project_type_display', read_only=True)
     project_author_user = serializers.SerializerMethodField()
 
@@ -254,6 +270,8 @@ class ProjectsListSerializer(DynamicFieldsModelSerializer):
 
 
 class ProjectsDetailSerializer(DynamicFieldsModelSerializer):
+
+    """ Serializer used to display a project's detail """
 
     issue_project_id = serializers.SerializerMethodField()
     contributors_project_id = serializers.SerializerMethodField()

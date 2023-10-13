@@ -7,7 +7,7 @@ from API.models import Contributors, Projects
 
 class ProjectPermissions(BasePermission):
 
-
+    """ Permission used to manage the project """
     def has_object_permission(self, request, view, obj):
         contrib = []
         contributorspermissions = Contributors.objects.filter(contributors_project_id=obj)
@@ -21,23 +21,4 @@ class ProjectPermissions(BasePermission):
         if request.method not in permissions.SAFE_METHODS and request.user == owner:
             return True
 
-
-#class ContributorsPermissions(BasePermission):
-
-    #def has_permission(self, request, view):
-
-
-    #def has_object_permission(self, request, view, obj):
-        #project = self.contributors_project_id
-        #projectContributors = []
-        #projectContributorsPermissions = Contributors.objects.filter(contributors_project_id=project)
-        #for projectContributorPermission in projectContributorsPermissions:
-            #projectContributors.append(projectContributorPermission.contributors_user_id)
-        #projectOwnerPermission = Contributors.objects.filter(contributors_project_id=project).filter(permission='C')
-        #for projectOwnerPerm in projectOwnerPermission:
-            #projectOwner = projectOwnerPerm.contributors_user_id
-        #if request.method in permissions.SAFE_METHODS and request.user in projectContributors:
-            #return True
-        #if request.method not in permissions.SAFE_METHODS and request.user == projectOwner:
-            #return True
 

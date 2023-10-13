@@ -4,6 +4,9 @@ from django.conf import settings
 
 
 class Users(AbstractUser):
+
+    # Model for user
+
     email = models.EmailField(unique=True)
     username = None
     REQUIRED_FIELDS = ['first_name', 'last_name', 'password']
@@ -11,6 +14,8 @@ class Users(AbstractUser):
 
 
 class Projects(models.Model):
+
+    # Model for project
 
     PROJECT_TYPES = (
         ('B', 'Back-end'),
@@ -30,6 +35,8 @@ class Projects(models.Model):
 
 
 class Contributors(models.Model):
+
+    # Model for contributors (User added to a project)
 
     COMPLETE = "CP"
     LIMITEE = "LI"
@@ -66,6 +73,8 @@ class Contributors(models.Model):
 
 
 class Issues(models.Model):
+
+    # Model for issues
 
     TAG_CHOICES = (
         ('B', 'BUG'),
@@ -107,6 +116,8 @@ class Issues(models.Model):
 
 
 class Comments(models.Model):
+
+    # Model for comments
 
     description = models.CharField(max_length=8192)
     comments_author_user_id = models.ForeignKey(
