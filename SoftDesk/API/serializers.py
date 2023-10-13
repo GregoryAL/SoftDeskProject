@@ -1,15 +1,10 @@
 from django.contrib.auth.password_validation import validate_password
-from django.db.models import Q
-from django.http import request
 from rest_framework import serializers
-
 from API.models import Users, Projects, Contributors, Issues, Comments
-from rest_framework.fields import ChoiceField
 from rest_framework.validators import UniqueValidator
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
-
     """
     A ModelSerializer that takes an additional `fields` argument that
     controls which fields should be displayed.
@@ -31,7 +26,6 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
-
     """ a serializer that is used for signup """
 
     email = serializers.EmailField(
@@ -68,8 +62,8 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class UserModelSerializer(DynamicFieldsModelSerializer):
-
     """ a serializer that is used by UsersSerializer to display names """
+
     class Meta:
         model = Users
         fields = ['id', 'first_name', 'last_name']
@@ -77,7 +71,6 @@ class UserModelSerializer(DynamicFieldsModelSerializer):
 
 
 class UsersSerializer(DynamicFieldsModelSerializer):
-
     """ a serializer that is used for the contributors"""
     contributors_user = serializers.SerializerMethodField(read_only=True)
     permission = serializers.CharField(source='get_permission_display', read_only=True)
@@ -93,12 +86,14 @@ class UsersSerializer(DynamicFieldsModelSerializer):
             'contributors_user_id': {'write_only': True}
         }
 
-    def get_contributors_user(self, instance):
+    @staticmethod
+    def get_contributors_user(instance):
         queryset = instance.contributors_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
-    def validate_role(self, value):
+    @staticmethod
+    def validate_role(value):
         choice_possible = ['AU', 'CT']
         if value not in choice_possible:
             raise serializers.ValidationError('Veuillez entrez un role prédeterminé : "AU" pour Auteur, "CT" pour '
@@ -107,11 +102,10 @@ class UsersSerializer(DynamicFieldsModelSerializer):
 
 
 class CommentsListSerializer(DynamicFieldsModelSerializer):
-
-
     """ Serializer used to display the comments list , add a comment"""
 
     comments_author_user = serializers.SerializerMethodField()
+
     class Meta:
         model = Comments
         fields = ['id',
@@ -121,16 +115,17 @@ class CommentsListSerializer(DynamicFieldsModelSerializer):
                   'comments_issue_id',
                   'created_time'
                   ]
-        read_only_fields = ('id', 'comments_author_user', 'comments_author_user_id', 'comments_issue_id', 'created_time')
+        read_only_fields = ('id', 'comments_author_user', 'comments_author_user_id', 'comments_issue_id',
+                            'created_time')
 
-    def get_comments_author_user(self, instance):
+    @staticmethod
+    def get_comments_author_user(instance):
         queryset = instance.comments_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
 
 class CommentsDetailSerializer(DynamicFieldsModelSerializer):
-
     """ serializer used to display a comment detail """
 
     comments_author_user_id = serializers.SerializerMethodField()
@@ -146,14 +141,14 @@ class CommentsDetailSerializer(DynamicFieldsModelSerializer):
 
         read_only_fields = ('id', 'description', 'comments_author_user_id', 'comments_issue_id', 'created_time')
 
-    def get_comments_author_user_id(self, instance):
+    @staticmethod
+    def get_comments_author_user_id(instance):
         queryset = instance.comments_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
 
 class IssuesListSerializer(DynamicFieldsModelSerializer):
-
     """ serializer used to display Issues's list or add a new one """
 
     issue_author_user = serializers.SerializerMethodField()
@@ -161,7 +156,6 @@ class IssuesListSerializer(DynamicFieldsModelSerializer):
     tag_long = serializers.CharField(source='get_tag_display', read_only=True)
     priority_long = serializers.CharField(source='get_priority_display', read_only=True)
     status_long = serializers.CharField(source='get_status_display', read_only=True)
-
 
     class Meta:
         model = Issues
@@ -172,26 +166,27 @@ class IssuesListSerializer(DynamicFieldsModelSerializer):
         read_only_fields = ('issue_author_user_id', 'created_time', 'issue_project_id',
                             'issue_assignee_user_id', 'tag_long', 'priority_long', 'status display')
         extra_kwargs = {
-            'tag' : {'write_only': True},
+            'tag': {'write_only': True},
             'priority': {'write_only': True},
             'status': {'write_only': True},
             'issue_author_user': {'write_only': True},
             'issue_assignee_user': {'write_only': True}
         }
 
-    def get_issue_author_user(self, instance):
+    @staticmethod
+    def get_issue_author_user(instance):
         queryset = instance.issue_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
-    def get_issue_assignee_user(self, instance):
+    @staticmethod
+    def get_issue_assignee_user(instance):
         queryset = instance.issue_assignee_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
 
 class IssuesDetailSerializer(DynamicFieldsModelSerializer):
-
     """ Serializer used to display a detailed issue"""
 
     comments_issue = serializers.SerializerMethodField()
@@ -217,30 +212,31 @@ class IssuesDetailSerializer(DynamicFieldsModelSerializer):
             'status': {'write_only': True}
         }
 
-    def get_comments_issue_id(self, instance):
+    @staticmethod
+    def get_comments_issue_id(instance):
         queryset = instance.comments_issue_id
         serializer = CommentsListSerializer(queryset, many=True, fields=('id', 'description', 'comments_author_user_id',
                                                                          'created_time'))
         return serializer.data
 
-    def get_issue_author_user_id(self, instance):
+    @staticmethod
+    def get_issue_author_user_id(instance):
         queryset = instance.issue_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
-    def get_issue_assignee_user_id(self, instance):
+    @staticmethod
+    def get_issue_assignee_user_id(instance):
         queryset = instance.issue_assignee_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
 
 class ProjectsListSerializer(DynamicFieldsModelSerializer):
-
-    """ serializer used to display a projects's list or to add a new project """
+    """ serializer used to display projects list or to add a new project """
 
     project_type_long = serializers.CharField(source='get_project_type_display', read_only=True)
     project_author_user = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Projects
@@ -251,26 +247,27 @@ class ProjectsListSerializer(DynamicFieldsModelSerializer):
                   'project_author_user_id',
                   'project_author_user',
                   'description'
-                ]
+                  ]
         read_only_fields = ('project_author_user', 'project_author_user_id', 'project_type_long')
         extra_kwargs = {
             'description': {'write_only': True},
             'project_type': {'write_only': True}
         }
 
-    def validate_title(self, value):
+    @staticmethod
+    def validate_title(value):
         if Projects.objects.filter(title=value).exists():
             raise serializers.ValidationError('Ce nom de projet existe déjà')
         return value
 
-    def get_project_author_user(self, instance):
+    @staticmethod
+    def get_project_author_user(instance):
         queryset = instance.project_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
 
 class ProjectsDetailSerializer(DynamicFieldsModelSerializer):
-
     """ Serializer used to display a project's detail """
 
     issue_project_id = serializers.SerializerMethodField()
@@ -289,18 +286,21 @@ class ProjectsDetailSerializer(DynamicFieldsModelSerializer):
                   'issue_project_id'
                   ]
 
-    def get_contributors_project_id(self, instance):
+    @staticmethod
+    def get_contributors_project_id(instance):
         queryset = instance.contributors_project_id
         serializer = UsersSerializer(queryset, many=True, fields=('id', 'contributors_user_id', 'role'))
         return serializer.data
 
-    def get_issue_project_id(self, instance):
+    @staticmethod
+    def get_issue_project_id(instance):
         queryset = instance.issue_project_id
-        serializer = IssuesListSerializer(queryset, many=True, fields=('id', 'title','tag', 'priority', 'status',
-                                                                       'issue_author_user_id','created_time'))
+        serializer = IssuesListSerializer(queryset, many=True, fields=('id', 'title', 'tag', 'priority', 'status',
+                                                                       'issue_author_user_id', 'created_time'))
         return serializer.data
 
-    def get_project_author_user_id(self, instance):
+    @staticmethod
+    def get_project_author_user_id(instance):
         queryset = instance.project_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data

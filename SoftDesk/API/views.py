@@ -1,9 +1,6 @@
-import http
-
 import django.db.utils
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -32,7 +29,6 @@ class MultipleSerializerMixin:
         if self.action == 'retrieve' and self.detail_serializer_class is not None:
             return self.detail_serializer_class
         return super().get_serializer_class()
-
 
     def get_token_info(token_str):
 
@@ -69,7 +65,7 @@ class ProjectsViewset(MultipleSerializerMixin, ModelViewSet):
 
     def perform_create(self, serializer):
         project = serializer.save(project_author_user_id=self.request.user)
-        contributor = Contributors.objects.create(
+        Contributors.objects.create(
             contributors_user_id=self.request.user,
             contributors_project_id=project,
             permission='CP',
@@ -102,7 +98,7 @@ class ProjectContributorsViewset(ModelViewSet):
             project_query = self.queryset.filter(contributors_project_id=project)
             for project_object in project_query:
                 proj_obj_permission = project_object.permission
-            return project_query
+            return proj_obj_permission
         else:
             raise PermissionDenied()
 
@@ -115,10 +111,9 @@ class ProjectContributorsViewset(ModelViewSet):
             Q(permission='CP'))
         for project_owner_r in project_owner_req:
             project_owner = project_owner_r.contributors_user_id
-        project_owner_id = project_owner.pk
         if self.request.user == project_owner:
             try:
-                contributor = serializer.save(contributors_project_id=project, permission='LI')
+                serializer.save(contributors_project_id=project, permission='LI')
             except django.db.utils.IntegrityError:
                 raise Exception("Cet utilisateur a deja été ajouté au projet")
         else:
@@ -178,8 +173,8 @@ class ProjectIssuesViewer(MultipleSerializerMixin, ModelViewSet):
             project_contributors.append(project_contributor.contributors_user_id)
         if self.request.user in project_contributors:
             try:
-                issue = serializer.save(issue_project_id=project, issue_author_user_id=self.request.user,
-                                        issue_assignee_user_id=self.request.user)
+                serializer.save(issue_project_id=project, issue_author_user_id=self.request.user,
+                                issue_assignee_user_id=self.request.user)
             except django.db.utils.IntegrityError:
                 raise Exception("Ce problème a deja été ajouté au projet")
         else:
@@ -220,7 +215,6 @@ class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
 
     def get_queryset(self, *args, **kwargs):
         project_id = self.kwargs.get("project_pk")
-        project = Projects.objects.get(id=project_id)
         project_contributors = []
         project_contributors_req = Contributors.objects.filter(contributors_project_id=project_id)
         issue_id = self.kwargs.get('issues_pk')
@@ -248,7 +242,7 @@ class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
         issue = Issues.objects.get(id=issue_id)
         if self.request.user in project_contributors:
             try:
-                comment = serializer.save(comments_issue_id=issue, comments_author_user_id=self.request.user)
+                serializer.save(comments_issue_id=issue, comments_author_user_id=self.request.user)
             except:
                 raise Exception("Ce commentaire n'a pas pu être ajouté.")
         else:

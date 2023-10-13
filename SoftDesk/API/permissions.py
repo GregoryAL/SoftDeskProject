@@ -1,8 +1,6 @@
 from rest_framework import permissions
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission
-
-from API.models import Contributors, Projects
+from API.models import Contributors
 
 
 class ProjectPermissions(BasePermission):
@@ -20,5 +18,3 @@ class ProjectPermissions(BasePermission):
             return True
         if request.method not in permissions.SAFE_METHODS and request.user == owner:
             return True
-
-
