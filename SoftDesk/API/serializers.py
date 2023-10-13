@@ -89,7 +89,7 @@ class UsersSerializer(DynamicFieldsModelSerializer):
     @staticmethod
     def get_contributors_user(instance):
         queryset = instance.contributors_user_id
-        serializer = UserModelSerializer(queryset, many=False)
+        serializer = UserModelSerializer(queryset, many=True)
         return serializer.data
 
     @staticmethod
