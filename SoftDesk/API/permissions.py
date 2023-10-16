@@ -11,7 +11,7 @@ class ProjectPermissions(BasePermission):
         contributorspermissions = Contributors.objects.filter(contributors_project_id=obj)
         for contributorperm in contributorspermissions:
             contrib.append(contributorperm.contributors_user_id)
-        ownerpermissions = Contributors.objects.filter(contributors_project_id=obj).filter(permission='C')
+        ownerpermissions = Contributors.objects.filter(contributors_project_id=obj).filter(permission='CP')
         for ownerpermission in ownerpermissions:
             owner = ownerpermission.contributors_user_id
         if request.method in permissions.SAFE_METHODS and request.user in contrib:

@@ -72,6 +72,9 @@ class ProjectsViewset(MultipleSerializerMixin, ModelViewSet):
             role='AU'
         )
 
+    def perform_update(self, serializer):
+        project = serializer.save(project_author_user_id=self.request.user)
+
 
 class ProjectContributorsViewset(ModelViewSet):
 
@@ -96,9 +99,7 @@ class ProjectContributorsViewset(ModelViewSet):
             except Projects.DoesNotExist:
                 raise NotFound("Il n'y a pas de projet avec cet ID")
             project_query = self.queryset.filter(contributors_project_id=project)
-            for project_object in project_query:
-                proj_obj_permission = project_object.permission
-            return proj_obj_permission
+            return project_query
         else:
             raise PermissionDenied()
 
@@ -127,7 +128,7 @@ class ProjectContributorsViewset(ModelViewSet):
 
         project_owner_req = Contributors.objects.filter(
             Q(contributors_project_id=project),
-            Q(permission='C'))
+            Q(permission='CP'))
         for project_owner_r in project_owner_req:
             project_owner = project_owner_r.contributors_user_id
         if self.request.user == project_owner:
@@ -224,7 +225,7 @@ class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
 
         for project_contributor in project_contributors_req:
             project_contributors.append(project_contributor.contributors_user_id)
-        if self.request.user in project_contributors:
+        if self.request.user in project_contributors :
             if comment_id:
                 queryset = queryset.filter(id=comment_id)
             return queryset

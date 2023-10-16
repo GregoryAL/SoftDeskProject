@@ -89,7 +89,7 @@ class UsersSerializer(DynamicFieldsModelSerializer):
     @staticmethod
     def get_contributors_user(instance):
         queryset = instance.contributors_user_id
-        serializer = UserModelSerializer(queryset, many=True)
+        serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
     @staticmethod
@@ -253,12 +253,6 @@ class ProjectsListSerializer(DynamicFieldsModelSerializer):
             'description': {'write_only': True},
             'project_type': {'write_only': True}
         }
-
-    @staticmethod
-    def validate_title(value):
-        if Projects.objects.filter(title=value).exists():
-            raise serializers.ValidationError('Ce nom de projet existe déjà')
-        return value
 
     @staticmethod
     def get_project_author_user(instance):
