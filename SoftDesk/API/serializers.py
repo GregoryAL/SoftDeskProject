@@ -213,20 +213,20 @@ class IssuesDetailSerializer(DynamicFieldsModelSerializer):
         }
 
     @staticmethod
-    def get_comments_issue_id(instance):
+    def get_comments_issue(instance):
         queryset = instance.comments_issue_id
         serializer = CommentsListSerializer(queryset, many=True, fields=('id', 'description', 'comments_author_user_id',
                                                                          'created_time'))
         return serializer.data
 
     @staticmethod
-    def get_issue_author_user_id(instance):
+    def get_issue_author_user(instance):
         queryset = instance.issue_author_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data
 
     @staticmethod
-    def get_issue_assignee_user_id(instance):
+    def get_issue_assignee_user(instance):
         queryset = instance.issue_assignee_user_id
         serializer = UserModelSerializer(queryset, many=False)
         return serializer.data

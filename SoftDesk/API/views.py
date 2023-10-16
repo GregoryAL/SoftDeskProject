@@ -221,11 +221,14 @@ class IssueCommentsViewer(MultipleSerializerMixin, ModelViewSet):
         issue_id = self.kwargs.get('issues_pk')
         issue = Issues.objects.get(id=issue_id)
         comment_id = self.kwargs.get('pk')
+        project_issues = []
+        project_issues_req = Issues.objects.all().filter(issue_project_id=project_id)
         queryset = Comments.objects.all().filter(comments_issue_id=issue)
-
+        for project_issue in project_issues_req:
+            project_issues.append(project_issue)
         for project_contributor in project_contributors_req:
             project_contributors.append(project_contributor.contributors_user_id)
-        if self.request.user in project_contributors :
+        if self.request.user in project_contributors and issue in project_issues:
             if comment_id:
                 queryset = queryset.filter(id=comment_id)
             return queryset
